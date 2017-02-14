@@ -29,11 +29,13 @@ class BolAnimatie extends JPanel implements Runnable
 
 	private boolean running = false;
 	private boolean threadHasStopped = false;
-/**
+	private ThreadStopListener stopListener;
+
+	/**
  * constructor
  */
 	public BolAnimatie()
-	{	// ----- uiterlijk
+	{
 		setBackground(Color.white);
 		setSize(SIZE, SIZE);
 	}
@@ -132,10 +134,11 @@ class BolAnimatie extends JPanel implements Runnable
 				e.printStackTrace();
 			}
 		}
-		threadHasStopped = true;
+		this.stopListener.threadHasStopped();
 	}
 
-	public void startAnimation() {
+	public void startAnimation(ThreadStopListener listener) {
+		this.stopListener = listener;
 		new Thread(this).start();
 		running = true;
 	}

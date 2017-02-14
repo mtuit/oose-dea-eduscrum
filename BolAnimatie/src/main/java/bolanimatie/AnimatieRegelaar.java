@@ -11,7 +11,7 @@ import java.util.*;
 import javax.swing.*;
 
 class AnimatieRegelaar extends JPanel
-		implements ActionListener
+		implements ActionListener, ThreadStopListener
 {	// Variables
 	private BolAnimatie ba;
 	
@@ -72,19 +72,21 @@ class AnimatieRegelaar extends JPanel
 		startorstop.setSize(120, 25);
 		startorstop.setLocation(5, 250);
 		add(startorstop);
-						
+
 		snelheidLabel = new JLabel("Snelheid (1-50)");
 		snelheidLabel.setFont(display);
 		snelheidLabel.setVisible(true);
 		snelheidLabel.setSize(100, 20);
 		snelheidLabel.setLocation(5, 300);
 		add(snelheidLabel);
+
 		snelheidInput = new JTextField(Integer.toString(BolAnimatie.STARTSNELHEID), 5);
 		snelheidInput.setFont(display);
 		snelheidInput.setVisible(true);
 		snelheidInput.setSize(60, 24);
 		snelheidInput.setLocation(110, 300);
 		add(snelheidInput);
+
 		snelheidOk = new JButton( "Ok");
 		snelheidOk.addActionListener(this);
 		snelheidOk.setFont(display);
@@ -102,17 +104,12 @@ class AnimatieRegelaar extends JPanel
 		{	ba.paintStep();
 		} else if (e.getSource() == startorstop) {
             if (ba.getRunningState() == false) {
-                ba.startAnimation();
+                ba.startAnimation(this);
                 startorstop.setText("Stop");
             } else if (ba.getRunningState() == true) {
                 ba.stopAnimation();
                 startorstop.setText("Start");
                 startorstop.setEnabled(false);
-                while (ba.getThreadState() == true) {
-                    System.out.println("AR: " + ba.getThreadState());
-                }
-                System.out.println("AR: " + ba.getThreadState());
-                threadHasStopped();
             }
         } else if ( e.getSource() == richtingOk )
 		{	try
