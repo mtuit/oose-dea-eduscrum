@@ -7,6 +7,7 @@ package bolanimatie;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import javax.crypto.ExemptionMechanismException;
 import javax.swing.*;
 
 class BolAnimatie extends JPanel implements Runnable
@@ -27,6 +28,7 @@ class BolAnimatie extends JPanel implements Runnable
 	private int sleeptime = 1000/STARTSNELHEID;	// sleeptime van de thread
 
 	private boolean running = false;
+	private boolean threadHasStopped = false;
 /**
  * constructor
  */
@@ -122,6 +124,7 @@ class BolAnimatie extends JPanel implements Runnable
 
 	public void run() {
 		while (running) {
+			threadHasStopped = false;
 			paintStep();
 			try {
 				Thread.sleep(sleeptime);
@@ -129,24 +132,23 @@ class BolAnimatie extends JPanel implements Runnable
 				e.printStackTrace();
 			}
 		}
-		System.out.println("End of Thread");
+		threadHasStopped = true;
 	}
 
-	public void startOrStop() {
-		if (running) {
-			running = false;
-		} else if (!running) {
-			new Thread(this).start();
-			running = true;
-		}
+	public void startAnimation() {
+		new Thread(this).start();
+		running = true;
+	}
+
+	public void stopAnimation() {
+		running = false;
 	}
 
 	public boolean getRunningState() {
 		return running;
 	}
 
-	public boolean threadIsAlive() {
-		Thread t = Thread.currentThread();
-		return t.isAlive();
+	public boolean getThreadState() {
+		return threadHasStopped;
 	}
 }

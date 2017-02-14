@@ -101,12 +101,18 @@ class AnimatieRegelaar extends JPanel
 	{	if ( e.getSource() == stapbutton )
 		{	ba.paintStep();
 		} else if (e.getSource() == startorstop) {
-	        ba.startOrStop();
-	        if (ba.getRunningState() == true) {
-	            startorstop.setText("Stop");
-	            startorstop.setEnabled(false);
-            } else if (ba.getRunningState() == false) {
-	            startorstop.setText("Start");
+            if (ba.getRunningState() == false) {
+                ba.startAnimation();
+                startorstop.setText("Stop");
+            } else if (ba.getRunningState() == true) {
+                ba.stopAnimation();
+                startorstop.setText("Start");
+                startorstop.setEnabled(false);
+                while (ba.getThreadState() == true) {
+                    System.out.println("AR: " + ba.getThreadState());
+                }
+                System.out.println("AR: " + ba.getThreadState());
+                threadHasStopped();
             }
         } else if ( e.getSource() == richtingOk )
 		{	try
