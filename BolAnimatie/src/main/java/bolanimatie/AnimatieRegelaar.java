@@ -129,6 +129,7 @@ class AnimatieRegelaar extends JPanel
 
 	public void threadHasStopped() {
         startorstop.setEnabled(true);
+		startorstop.setText("Start");
     }
 	
 }

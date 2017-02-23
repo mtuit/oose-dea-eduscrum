@@ -10,10 +10,12 @@ import java.util.*;
 import javax.crypto.ExemptionMechanismException;
 import javax.swing.*;
 
-class BolAnimatie extends JPanel implements Runnable
+class BolAnimatie extends JPanel implements Runnable, MouseMotionListener
 {	// Constants
 	public static final int SIZE = 350;				// omvang Canvas: 350x350
 	public static final int BOLSIZE = 20;			// omvang vierkant: 20x20
+	public static final int BATJEWIDTH = 100;
+	public static final int BATJEHEIGHT = 10;
 	public static final int COLORSTEP = 255/(BOLSIZE/2);	
 	public static final int STARTSNELHEID = 10;		// sleeptime is 1000/snelheid
 	public static final int STARTRICHTING = 45;		// schuin
@@ -24,12 +26,15 @@ class BolAnimatie extends JPanel implements Runnable
 	private double yspeed = 7;
 	private int xdir = 1;						// -1 of +1
 	private int ydir = 1;
+
+	private double batjexpos = (SIZE-BATJEWIDTH)/2;
+	private static double batjeypos = SIZE - 12;
 	
 	private int sleeptime = 1000/STARTSNELHEID;	// sleeptime van de thread
 
 	private boolean running = false;
-	private boolean threadHasStopped = false;
 	private ThreadStopListener stopListener;
+
 
 	/**
  * constructor
@@ -38,6 +43,7 @@ class BolAnimatie extends JPanel implements Runnable
 	{
 		setBackground(Color.white);
 		setSize(SIZE, SIZE);
+		addMouseMotionListener(this);
 	}
 	
 /**
@@ -58,14 +64,21 @@ class BolAnimatie extends JPanel implements Runnable
 		{	xpos = SIZE-BOLSIZE;
 			xdir = -1;				// change dir
 		}
+		if (xpos >= batjexpos && xpos <= batjexpos + BATJEWIDTH &&
+				ypos + BOLSIZE >= batjeypos) {
+			xdir = -1;
+			ydir = -1;
+		}
 		ypos = ypos + ydir*yspeed;
 		if ( ypos <= 0 )				// kan als ydir = -1, bal loopt boven weg
 		{	ypos = 0;
 			ydir = 1;				// change dir
 		}
-		if ( ypos >= SIZE-BOLSIZE )		// kan als xdir = 1, bal loopt onder weg
-		{	ypos = SIZE-BOLSIZE;
-			ydir = -1;				// change dir
+		if ( ypos + BOLSIZE >= SIZE )		// kan als xdir = 1, bal loopt onder weg
+		{	running = false;
+			xpos = (SIZE - BOLSIZE)/2;
+			ypos = (SIZE - BOLSIZE)/2;
+			repaint();
 		}
 	}
 
@@ -122,11 +135,18 @@ class BolAnimatie extends JPanel implements Runnable
 		{	g.setColor(new Color(COLORSTEP*k, 0, 255-COLORSTEP*k));
 			g.fillOval(ixpos+k, iypos+k, BOLSIZE-2*k, BOLSIZE-2*k);
 		}
+
+		int batjeixpos = (int)Math.round(batjexpos);
+		int batjeiypos = (int)Math.round(batjeypos);
+		if (batjeixpos >= 350 - BATJEWIDTH) {
+			batjeixpos = 350 - BATJEWIDTH;
+		}
+		g.fillRect(batjeixpos, batjeiypos, BATJEWIDTH, BATJEHEIGHT);
+
 	}
 
 	public void run() {
 		while (running) {
-			threadHasStopped = false;
 			paintStep();
 			try {
 				Thread.sleep(sleeptime);
@@ -139,7 +159,9 @@ class BolAnimatie extends JPanel implements Runnable
 
 	public void startAnimation(ThreadStopListener listener) {
 		this.stopListener = listener;
-		new Thread(this).start();
+		Thread myThread = new Thread(this);
+		myThread.setDaemon(true);
+		myThread.start();
 		running = true;
 	}
 
@@ -151,7 +173,14 @@ class BolAnimatie extends JPanel implements Runnable
 		return running;
 	}
 
-	public boolean getThreadState() {
-		return threadHasStopped;
+	public void mouseDragged(MouseEvent e) {
+		batjexpos = e.getX();
+		repaint();
 	}
+
+	public void mouseMoved(MouseEvent e) {
+		 batjexpos = e.getX();
+		 repaint();
+	}
+
 }
